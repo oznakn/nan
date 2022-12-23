@@ -34,7 +34,11 @@ class TypedArrayContents {
 // Actually it's 7.9 here but this would lead to ABI issues with Node.js 13
 // using 7.8 till 13.2.0.
 #if (V8_MAJOR_VERSION >= 8)
-      data = static_cast<char*>(buffer->GetBackingStore()->Data()) + byte_offset;
+      v8::Isolate *isolate = v8::Isolate::GetCurrent();
+
+      v8::Local<v8::Object> local;
+      node::Buffer::New(isolate, buffer, 0, buffer->ByteLength()).ToLocal(&local);
+      data = static_cast<char*>(node::Buffer::Data(local)) + byte_offset;
 #else
       data = static_cast<char*>(buffer->GetContents().Data()) + byte_offset;
 #endif
